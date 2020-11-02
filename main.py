@@ -3,7 +3,6 @@ __author__ = "Trang Ha"
 import pygame
 import random
 
-
 def drawNguess():
 
     # Initialize and customize the screen
@@ -14,41 +13,45 @@ def drawNguess():
     pygame.display.set_icon(icon)
     pygame.display.set_caption("Draw N Guess")
 
-    # Set up score
+    # Set variables to store score value, user input
     scoreVal = 0
-    scoreFont = pygame.font.Font("freesansbold.ttf", 16)
+    guessWord = ""
+
+   # Set up timer
+
+
 
     # Set up random pictionary word
     with open("pictionary.txt", "r") as pictionary:
         w = pictionary.read().split()
     global randomWord
     randomWord = random.choice(w)
-    wordFont = pygame.font.Font("freesansbold.ttf", 18)
 
-    # Set up user enters word on the screen
-    guessWord = "None"
-    guessFont = pygame.font.Font("freesansbold.ttf", 18)
-
-    # Set up clock
-    clock = pygame.time.Clock()
-    clockFont = pygame.font.Font("freesansbold.ttf", 16)
+    def txtObject(txt, fontSize, color):
+        txtFont = pygame.font.Font("freesansbold.ttf", fontSize)
+        txtRender = txtFont.render(txt, True, color)
+        return txtRender, txtRender.get_rect()
 
     def display():
         # Display score on the screen
-        score = scoreFont.render("Score: " + str(scoreVal), True, (255,255,255))
+        score, scoreRect = txtObject("Score: " + str(scoreVal), 16, (255, 255, 255))
         screen.blit(score, (50,30))
 
         # Display pictionary word on the screen
-        picWord = wordFont.render(randomWord.upper(), True, (0, 0, 0))
         pygame.draw.rect(screen, (255, 255, 255), [320, 30, 150, 30])
-        screen.blit(picWord, (335,32))
+        picWord, txtRect = txtObject(randomWord.upper(), 18, (0, 0, 0))
+        txtRect.center = ((320+(150/2), (30+(30/2))))
+        screen.blit(picWord, txtRect)
+
 
         # Display guesing word on the screen
-        userGuess = guessFont.render(guessWord, True, (255, 255, 255))
-        screen.blit(userGuess, (300, 515))
+        pygame.draw.rect(screen, (255, 255, 255), [320, 515, 150, 30])
+        userIn, userInRect = txtObject(guessWord, 16, (0, 0, 0))
+        userInRect.center = ((320+(150/2), (515+(30/2))))
+        screen.blit(userIn, userInRect)
 
         # Display timer on the screen
-        timer = clockFont.render("Timer: " + str(clock), True, (255, 255, 255))
+        timer, timerRect = txtObject("Timer: " + str(0), 16, (255, 255, 255))
         screen.blit(timer, (660, 30))
 
     # Set up buton
@@ -56,10 +59,10 @@ def drawNguess():
 
         getPos = pygame.mouse.get_pos()
         getPress = pygame.mouse.get_pressed()
-        buttonFont = pygame.font.Font("freesansbold.ttf", 16)
-        renderButton = buttonFont.render(buttonTxt, True, (0, 0, 0))
+        button, buttonRect = txtObject(buttonTxt, 16, (0, 0, 0))
+        buttonRect.center = ((x+(width/2)), (y+(height/2)))
         pygame.draw.rect(screen, (255, 255, 255), [x, y, width, height])
-        screen.blit(renderButton, [(x + 7), (y + 8)])
+        screen.blit(button, buttonRect)
 
         # If the x, y coordinates of the mouse = the x, y coordinates of the button, then executes these following
         if x+width > getPos[0] > x and y+height > getPos[1] > y:
@@ -69,6 +72,7 @@ def drawNguess():
                 if active == "pass":
                     global randomWord
                     randomWord = random.choice(w)
+                    screen.fill((0, 0, 0))
                 # If the erase button is clicked, clean the screen by color the background to black
                 elif active == "erase":
                     screen.fill((0, 0, 0))
@@ -79,11 +83,18 @@ def drawNguess():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gameMode = False
-        if pygame.mouse.get_pressed() == (1, 0, 0):
-            pygame.draw.rect(screen, (255, 255, 255), (x, y, 10, 10))
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    guessWord = guessWord[:-1]
+                else:
+                    guessWord += event.unicode
+            if pygame.mouse.get_pressed() == (1, 0, 0):
+                pygame.draw.rect(screen, (255, 255, 255), (x, y, 10, 10))
+                pygame.display.update()
 
         button("Erase", 50, 515, 60, 30, "erase")
         button("Pass", 668, 515, 60, 30, "pass")
+
 
         display()
         pygame.display.update()
