@@ -9,17 +9,14 @@ def drawNguess():
     pygame.init()
     gameMode = True
     screen = pygame.display.set_mode((800, 600))
-    icon = pygame.image.load("icon.png")
-    pygame.display.set_icon(icon)
     pygame.display.set_caption("Draw N Guess")
+    hearImg = pygame.image.load("heart.png")
 
     # Set variables to store score value, user input
     scoreVal = 0
+    chances = 5
     guessWord = ""
-
-   # Set up timer
-
-
+    player = "Drawing"
 
     # Set up random pictionary word
     with open("pictionary.txt", "r") as pictionary:
@@ -37,6 +34,10 @@ def drawNguess():
         score, scoreRect = txtObject("Score: " + str(scoreVal), 16, (255, 255, 255))
         screen.blit(score, (50,30))
 
+        # Display player role on the screen
+        role, roleRect = txtObject(player, 16, (255, 255, 255))
+        screen.blit(role, (670,30))
+
         # Display pictionary word on the screen
         pygame.draw.rect(screen, (255, 255, 255), [320, 30, 150, 30])
         picWord, txtRect = txtObject(randomWord.upper(), 18, (0, 0, 0))
@@ -50,9 +51,9 @@ def drawNguess():
         userInRect.center = ((320+(150/2), (515+(30/2))))
         screen.blit(userIn, userInRect)
 
-        # Display timer on the screen
-        timer, timerRect = txtObject("Timer: " + str(0), 16, (255, 255, 255))
-        screen.blit(timer, (660, 30))
+        for i in range(chances):
+            screen.blit(hearImg, [280 + (i* 50), 460])
+
 
     # Set up buton
     def button(buttonTxt, x, y, width, height, active= None):
@@ -92,8 +93,10 @@ def drawNguess():
                 pygame.draw.rect(screen, (255, 255, 255), (x, y, 10, 10))
                 pygame.display.update()
 
+
         button("Erase", 50, 515, 60, 30, "erase")
         button("Pass", 668, 515, 60, 30, "pass")
+
 
 
         display()
