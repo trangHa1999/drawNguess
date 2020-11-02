@@ -7,21 +7,20 @@ def drawNguess():
 
     # Initialize and customize the screen
     pygame.init()
-    gameMode = True
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Draw N Guess")
-    hearImg = pygame.image.load("heart.png")
+
 
     # Set variables to store score value, user input
+    global scoreVal, chances, guessWord, randomWord, gameMode
+    gameMode = True
     scoreVal = 0
     chances = 5
     guessWord = ""
-    player = "Drawing"
 
     # Set up random pictionary word
     with open("pictionary.txt", "r") as pictionary:
         w = pictionary.read().split()
-    global randomWord
     randomWord = random.choice(w)
 
     def txtObject(txt, fontSize, color):
@@ -31,12 +30,16 @@ def drawNguess():
 
     def display():
         # Display score on the screen
+        pygame.draw.rect(screen, (0, 0, 0), [50, 30, 100, 30])
         score, scoreRect = txtObject("Score: " + str(scoreVal), 16, (255, 255, 255))
-        screen.blit(score, (50,30))
+        scoreRect.center = ((50 + (100 / 2), (30 + (30 / 2))))
+        screen.blit(score, scoreRect)
 
         # Display player role on the screen
-        role, roleRect = txtObject(player, 16, (255, 255, 255))
-        screen.blit(role, (670,30))
+        pygame.draw.rect(screen, (0, 0, 0), [650, 30, 100, 30])
+        heart, heartRect = txtObject("Chances: " + str(chances), 16, (255, 255, 255))
+        heartRect.center = ((650 + (100 / 2), (30 + (30 / 2))))
+        screen.blit(heart, heartRect)
 
         # Display pictionary word on the screen
         pygame.draw.rect(screen, (255, 255, 255), [320, 30, 150, 30])
@@ -51,8 +54,7 @@ def drawNguess():
         userInRect.center = ((320+(150/2), (515+(30/2))))
         screen.blit(userIn, userInRect)
 
-        for i in range(chances):
-            screen.blit(hearImg, [280 + (i* 50), 460])
+
 
 
     # Set up buton
@@ -62,7 +64,7 @@ def drawNguess():
         getPress = pygame.mouse.get_pressed()
         button, buttonRect = txtObject(buttonTxt, 16, (0, 0, 0))
         buttonRect.center = ((x+(width/2)), (y+(height/2)))
-        pygame.draw.rect(screen, (255, 255, 255), [x, y, width, height])
+        pygame.draw.ellipse(screen, (255, 255, 255), [x, y, width, height])
         screen.blit(button, buttonRect)
 
         # If the x, y coordinates of the mouse = the x, y coordinates of the button, then executes these following
@@ -71,12 +73,32 @@ def drawNguess():
             if getPress[0] == 1 and active != None:
                 # If the pass button is clicked, randomize the word and display on the screen again
                 if active == "pass":
-                    global randomWord
-                    randomWord = random.choice(w)
-                    screen.fill((0, 0, 0))
+                    next()
                 # If the erase button is clicked, clean the screen by color the background to black
                 elif active == "erase":
                     screen.fill((0, 0, 0))
+
+    # Check if user guess the right word
+    def checkWord():
+        global scoreVal, chances, guessWord
+        if guessWord == randomWord:
+            scoreVal += 1
+            next()
+        else:
+            chances -=1
+            if chances == 0:
+                gameover, gameoverRect = txtObject("Game over!", 35, (255, 255, 255))
+                gameoverRect.center = (800/2, 600/2)
+                screen.blit(gameover, gameoverRect)
+
+
+
+    def next():
+        global randomWord, guessWord
+        guessWord = ""
+        randomWord = random.choice(w)
+        screen.fill((0, 0, 0))
+
 
 
     while gameMode:
@@ -87,6 +109,8 @@ def drawNguess():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     guessWord = guessWord[:-1]
+                elif event.key ==pygame.K_RETURN:
+                    checkWord()
                 else:
                     guessWord += event.unicode
             if pygame.mouse.get_pressed() == (1, 0, 0):
