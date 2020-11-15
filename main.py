@@ -1,6 +1,7 @@
 __author__ = "Trang Ha"
 
 import pygame
+pygame.init()
 
 class Player():
     def __init__(self, x, y, id, picWord):
@@ -14,13 +15,13 @@ class Player():
         self.rect = (x, y, 10, 10)
 
     def checkWord(self):
-        if self.guessWord == self.picWord:
-            self.score = self.score + 1
+        if self.guessWord != self.picWord:
+            self.life -= 1
+            self.guessWord = ""
         else:
-            if self.id == 2:
-                self.life = self.life - 1
-            else:
-                pass
+            self.score = self.score + 1
+            self.nextRound = True
+
 
     def drawRect(self, screen):
         pygame.draw.rect(screen, (255, 255, 255), self.rect)

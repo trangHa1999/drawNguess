@@ -94,7 +94,6 @@ def main():
                         drawP.guessWord = guessP.guessWord = userInput
                     elif event.key == pygame.K_RETURN:
                         guessP.checkWord()
-                        drawP.checkWord()
                     else:
                         userInput += event.unicode
                         drawP.guessWord = guessP.guessWord = userInput

@@ -18,19 +18,31 @@ print("Waiting for a connection, Server Started")
 with open("pictionary.txt", "r") as pictionary:
     w = pictionary.read().split()
 
-def newWord():
+def randomWord():
     return random.choice(w)
 
-randomWord = newWord()
-print(randomWord)
+picWord = randomWord()
 
-players = [Player(800, 600, 1, randomWord), Player(800, 600, 2, randomWord)]
+players = [Player(800, 600, 1, picWord), Player(800, 600, 2, picWord)]
+
+def get_picWord():
+    if players[0].picWord == players[1].guessWord:
+        return True
+    else:
+        return False
 
 def threaded_client(conn, playerID):
+    reply = ""
     conn.send(pickle.dumps(players[playerID]))
+
     while True:
+        global picWord
         data = pickle.loads(conn.recv(2048))
         players[playerID] = data
+        if get_picWord() == True:
+            picWord = randomWord()
+        else:
+            pass
 
         if not data:
             print("Disconnected")
@@ -38,8 +50,9 @@ def threaded_client(conn, playerID):
         else:
             if playerID == 1:
                 reply = players[0]
-            else:
+            elif playerID == 0:
                 reply = players[1]
+
 
             print("Received: ", data)
             print("Sending : ", reply)
@@ -57,39 +70,4 @@ while True:
     start_new_thread(threaded_client, (conn, currentPlayer))
     currentPlayer += 1
 
-# import socket
-# from _thread import *
-#
-# server = "192.168.1.123"
-# port = 9999
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.bind((server, port))
-# s.listen(2)
-# print("Waiting for a connection, Server Started")
-#
-#
-# def threaded_client(conn):
-#     conn.send(str.encode("Connected"))
-#     reply = ""
-#     while True:
-#         data = conn.recv(2048)
-#         reply = data.decode("utf-8")
-#
-#         if not data:
-#             print("Disconnected")
-#             break
-#         else:
-#             print("Received: ", reply)
-#             print("Sending : ", reply)
-#
-#         conn.sendall(str.encode(reply))
-#
-#     print("Lost connection")
-#     conn.close()
-#
-#
-# while True:
-#     conn, addr = s.accept()
-#     print("Connected to:", addr)
-#
-#     start_new_thread(threaded_client, (conn,))
+
