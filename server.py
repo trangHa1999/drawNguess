@@ -25,24 +25,29 @@ picWord = randomWord()
 
 players = [Player(800, 600, 1, picWord), Player(800, 600, 2, picWord)]
 
-def get_picWord():
-    if players[0].picWord == players[1].guessWord:
-        return True
-    else:
-        return False
+def nextRound(pW, gW):
+    if pW == gW:
+        print("drawP.picWord({0}) = guessP.guessWord({1})".format(pW, gW))
+        return randomWord()
 
 def threaded_client(conn, playerID):
     reply = ""
     conn.send(pickle.dumps(players[playerID]))
 
     while True:
-        global picWord
+        global pW
         data = pickle.loads(conn.recv(2048))
         players[playerID] = data
-        if get_picWord() == True:
-            picWord = randomWord()
+        newPicword = nextRound(players[0].picWord, players[1].guessWord)
+        if newPicword != None:
+            print("-----Generating-----")
+            players[0].picWord = players[1].picWord = newPicword
+            players[0].guessWord = players[1].guessWord = ""
+            print("drawP: picWord - {0}; guessWord - {1}".format(players[0].picWord, players[0].guessWord))
+            print("guessP: picWord - {0}; guessWord - {1}".format(players[1].picWord, players[1].guessWord))
+
         else:
-            pass
+            print("picWord != guessWord")
 
         if not data:
             print("Disconnected")
@@ -50,8 +55,10 @@ def threaded_client(conn, playerID):
         else:
             if playerID == 1:
                 reply = players[0]
+                print("drawP: picWord - {0}; guessWord - {1}".format(players[0].picWord, players[0].guessWord))
             elif playerID == 0:
                 reply = players[1]
+                print("guessP: picWord - {0}; guessWord - {1}".format(players[1].picWord, players[1].guessWord))
 
 
             print("Received: ", data)
